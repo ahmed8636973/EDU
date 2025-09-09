@@ -1,14 +1,15 @@
-// src/lib/supabaseClient.js
+// استدعاء مكتبة Supabase
 import { createClient } from "@supabase/supabase-js";
 
-// القيم دي هتيجي من ملف .env
+// قراءة بيانات الاتصال من الـ Environment Variables
+// لازم تكون ضايف القيم دي في ملف .env
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// لو ناقص أي قيمة اطبع Error في الكونسول
+// التحقق من ان القيم متسجلة فعلاً
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("❌ Supabase URL or Anon Key is missing. تأكد من .env");
+  throw new Error("❌ supabaseUrl and supabaseAnonKey are required! تأكد انك ضايفهم في .env");
 }
 
-// إنشاء Supabase Client
+// انشاء الكلاينت اللي هنتعامل بيه في كل المشروع
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
