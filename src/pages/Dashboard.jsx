@@ -1,54 +1,92 @@
-import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
-const ADMIN_EMAIL = "ahmed8636973@eduspark"; // ✨ الأدمن محفوظ هنا
+export default function AdminDashboard() {
+  const [packages, setPackages] = useState([]);
 
-export default function Dashboard() {
-  const [loading, setLoading] = useState(true);
-  const [authorized, setAuthorized] = useState(false);
-  const navigate = useNavigate();
+  const addPackage = () => {
+    const name = prompt("📦 اسم البكج:");
+    if (!name) return;
+    setPackages([...packages, { name, sub: [] }]);
+  };
 
-  useEffect(() => {
-    const checkAdmin = async () => {
-      const { data, error } = await supabase.auth.getUser();
+  const addSubPackage = (pkgIndex) => {
+    const name = prompt("📂 اسم الـ Sub-package:");
+    if (!name) return;
+    const updated = [...packages];
+    updated[pkgIndex].sub.push({ name, videos: [] });
+    setPackages(updated);
+  };
 
-      if (error || !data.user) {
-        navigate("/login"); // لو مش عامل تسجيل دخول → يرجعه لوجين
-        return;
-      }
-
-      if (data.user.email === ADMIN_EMAIL) {
-        setAuthorized(true); // ✅ الأدمن مسموح يدخل
-      } else {
-        navigate("/"); // 🚫 أي حد تاني يترفض
-      }
-
-      setLoading(false);
-    };
-
-    checkAdmin();
-  }, [navigate]);
-
-  if (loading) return <p style={{ textAlign: "center" }}>⏳ Loading...</p>;
-  if (!authorized) return null;
+  const addVideo = (pkgIndex, subIndex) => {
+    const url = prompt("🎥 رابط فيديو YouTube:");
+    if (!url) return;
+    const updated = [...packages];
+    updated[pkgIndex].sub[subIndex].videos.push(url);
+    setPackages(updated);
+  };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>✅ Welcome Admin</h1>
-      <p style={styles.text}>
-        You are logged in as the <b>Super Admin</b> of EDUSpark.
-      </p>
+    <div className="min-h-screen bg-gray-100 p-10">
+      <h1 className="text-4xl font-bold text-blue-600 text-center mb-8">
+        ✅ EDUSpark Admin Dashboard
+      </h1>
+
+      <div className="flex justify-center mb-6">
+        <button
+          onClick={addPackage}
+          className="bg-blue-600 text-white px-6 py-3 rounded-xl shadow hover:bg-blue-700 transition"
+        >
+          ➕ Add Package
+        </button>
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {packages.map((pkg, pkgIndex) => (
+          <div
+            key={pkgIndex}
+            className="bg-white p-5 rounded-2xl shadow-md border border-gray-200"
+          >
+            <h2 className="text-2xl font-semibold text-gray-800 mb-3">
+              📦 {pkg.name}
+            </h2>
+
+            <button
+              onClick={() => addSubPackage(pkgIndex)}
+              className="bg-green-600 text-white px-3 py-2 rounded-lg mb-4 hover:bg-green-700 transition"
+            >
+              ➕ Add Sub-package
+            </button>
+
+            {pkg.sub.map((sub, subIndex) => (
+              <div
+                key={subIndex}
+                className="bg-gray-50 p-3 rounded-lg mb-3 border"
+              >
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                  📂 {sub.name}
+                </h3>
+
+                <button
+                  onClick={() => addVideo(pkgIndex, subIndex)}
+                  className="bg-purple-600 text-white px-3 py-2 rounded-lg mb-3 hover:bg-purple-700 transition"
+                >
+                  🎥 Add Video
+                </button>
+
+                <ul className="space-y-2">
+                  {sub.videos.map((url, vidIndex) => (
+                    <li key={vidIndex} className="text-blue-600 underline">
+                      <a href={url} target="_blank" rel="noreferrer">
+                        {url}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    textAlign: "center",
-    marginTop: "80px",
-    fontFamily: "Arial, sans-serif",
-  },
-  title: { color: "#27ae60", fontSize: "32px" },
-  text: { fontSize: "18px", color: "#555" },
-};
