@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 
+const ADMIN_EMAIL = "ahmed8636973@eduspark"; // ✨ الأدمن محفوظ هنا
+
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
@@ -9,21 +11,17 @@ export default function Dashboard() {
 
   useEffect(() => {
     const checkAdmin = async () => {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
+      const { data, error } = await supabase.auth.getUser();
 
-      if (error || !user) {
-        navigate("/login"); // لو مش مسجل دخول يرجع لصفحة اللوجين
+      if (error || !data.user) {
+        navigate("/login"); // لو مش عامل تسجيل دخول → يرجعه لوجين
         return;
       }
 
-      // ✅ تحقق من الإيميل (الأدمن فقط)
-      if (user.email === "ahmed8636973@eduspark") {
-        setAuthorized(true);
+      if (data.user.email === ADMIN_EMAIL) {
+        setAuthorized(true); // ✅ الأدمن مسموح يدخل
       } else {
-        navigate("/"); // أي مستخدم تاني يتوجه للصفحة الرئيسية
+        navigate("/"); // 🚫 أي حد تاني يترفض
       }
 
       setLoading(false);
@@ -32,35 +30,25 @@ export default function Dashboard() {
     checkAdmin();
   }, [navigate]);
 
-  if (loading) return <p style={{ textAlign: "center" }}>Loading...</p>;
-
+  if (loading) return <p style={{ textAlign: "center" }}>⏳ Loading...</p>;
   if (!authorized) return null;
 
   return (
-    <div
-      style={{
-        textAlign: "center",
-        marginTop: "50px",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      <h1 style={{ color: "#2c3e50" }}>✅ Welcome Admin</h1>
-      <p style={{ fontSize: "18px", color: "#555" }}>
-        You are now logged in as the super admin of <b>EDUSpark</b>.
+    <div style={styles.container}>
+      <h1 style={styles.title}>✅ Welcome Admin</h1>
+      <p style={styles.text}>
+        You are logged in as the <b>Super Admin</b> of EDUSpark.
       </p>
-      <div
-        style={{
-          marginTop: "30px",
-          display: "inline-block",
-          padding: "15px 30px",
-          backgroundColor: "#3498db",
-          color: "white",
-          borderRadius: "8px",
-          cursor: "pointer",
-        }}
-      >
-        Go to Dashboard
-      </div>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    textAlign: "center",
+    marginTop: "80px",
+    fontFamily: "Arial, sans-serif",
+  },
+  title: { color: "#27ae60", fontSize: "32px" },
+  text: { fontSize: "18px", color: "#555" },
+};
