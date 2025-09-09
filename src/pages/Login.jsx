@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../supabaseClient";
 import { useNavigate } from "react-router-dom";
-
-const ADMIN_EMAIL = "ahmed8636973@eduspark"; // ✨ الأدمن محفوظ هنا
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -12,8 +10,6 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
-    setError("");
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -24,68 +20,45 @@ export default function Login() {
       return;
     }
 
-    if (data.user.email === ADMIN_EMAIL) {
-      navigate("/dashboard"); // ✅ الأدمن → داشبورد
+    if (email === "ahmed8636973@gmail.com") {
+      navigate("/admin");
     } else {
-      navigate("/"); // أي يوزر عادي → الصفحة الرئيسية
+      navigate("/student");
     }
   };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.title}>🔑 Login to EDUSpark</h2>
-      <form onSubmit={handleLogin} style={styles.form}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={styles.input}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={styles.input}
-        />
-        <button type="submit" style={styles.button}>
-          Login
-        </button>
-      </form>
-      {error && <p style={styles.error}>{error}</p>}
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-600">
+      <div className="bg-white p-8 rounded-2xl shadow-lg w-96">
+        <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
+          🔐 Login
+        </h1>
+        {error && (
+          <p className="text-red-500 text-center mb-4 font-semibold">{error}</p>
+        )}
+        <form onSubmit={handleLogin} className="space-y-4">
+          <input
+            type="email"
+            placeholder="📧 Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="password"
+            placeholder="🔑 Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
+          >
+            Login
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    maxWidth: "400px",
-    margin: "100px auto",
-    padding: "20px",
-    border: "1px solid #ddd",
-    borderRadius: "10px",
-    textAlign: "center",
-    fontFamily: "Arial, sans-serif",
-  },
-  title: { marginBottom: "20px", fontSize: "22px", color: "#2c3e50" },
-  form: { display: "flex", flexDirection: "column", gap: "10px" },
-  input: {
-    padding: "10px",
-    borderRadius: "6px",
-    border: "1px solid #ccc",
-    fontSize: "14px",
-  },
-  button: {
-    padding: "10px",
-    backgroundColor: "#2980b9",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "16px",
-  },
-  error: { color: "red", marginTop: "10px" },
-};
