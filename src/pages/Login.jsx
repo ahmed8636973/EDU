@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabaseClient";
-import "./Login.css";
+import { useNavigate } from "react-router-dom";
+
+const ADMIN_EMAIL = "ahmed8636973@eduspark"; // ✨ الأدمن محفوظ هنا
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
 
+    setError("");
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -20,29 +21,27 @@ export default function Login() {
 
     if (error) {
       setError(error.message);
-    } else {
-      if (email === "ahmed8636973@eduspark" && password === "Mmna01275074528") {
-        alert("✅ Welcome Admin!");
-        window.location.href = "/dashboard";
-      } else {
-        alert("✅ Logged in as User");
-        window.location.href = "/home";
-      }
+      return;
     }
 
-    setLoading(false);
+    if (data.user.email === ADMIN_EMAIL) {
+      navigate("/dashboard"); // ✅ الأدمن → داشبورد
+    } else {
+      navigate("/"); // أي يوزر عادي → الصفحة الرئيسية
+    }
   };
 
   return (
-    <div className="login-container">
-      <h1>EDUSpark Login</h1>
-      <form onSubmit={handleLogin}>
+    <div style={styles.container}>
+      <h2 style={styles.title}>🔑 Login to EDUSpark</h2>
+      <form onSubmit={handleLogin} style={styles.form}>
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          style={styles.input}
         />
         <input
           type="password"
@@ -50,12 +49,43 @@ export default function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          style={styles.input}
         />
-        {error && <p className="error">{error}</p>}
-        <button type="submit" disabled={loading}>
-          {loading ? "Loading..." : "Login"}
+        <button type="submit" style={styles.button}>
+          Login
         </button>
       </form>
+      {error && <p style={styles.error}>{error}</p>}
     </div>
   );
 }
+
+const styles = {
+  container: {
+    maxWidth: "400px",
+    margin: "100px auto",
+    padding: "20px",
+    border: "1px solid #ddd",
+    borderRadius: "10px",
+    textAlign: "center",
+    fontFamily: "Arial, sans-serif",
+  },
+  title: { marginBottom: "20px", fontSize: "22px", color: "#2c3e50" },
+  form: { display: "flex", flexDirection: "column", gap: "10px" },
+  input: {
+    padding: "10px",
+    borderRadius: "6px",
+    border: "1px solid #ccc",
+    fontSize: "14px",
+  },
+  button: {
+    padding: "10px",
+    backgroundColor: "#2980b9",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "16px",
+  },
+  error: { color: "red", marginTop: "10px" },
+};
